@@ -3,9 +3,9 @@
  Red-Black Binary Search Tree - common
  
  @author Ryan Powell
- @date 22-12-12
+ @date 23-12-12
  @copyright Copyright (c) 2012  Ryan Powell
- @licence https://raw.github.com/mcCuppaT/RBTreeLib/master/LICENSE
+ @licence https://raw.github.com/mcCuppaT/RBTreelib/master/LICENSE
  */
 
 
