@@ -21,9 +21,34 @@ extern "C" {
 
 #include <stdio.h>      /* for FILE */
 #include <stdlib.h>     /* for malloc/free */
-#include <pthread.h>    /* for mutex */
+
+#if (__STDC_VERSION__ >= 201112L) && !defined(__STDC_NO_THREADS__)
+#  define RBT_USE_C11THREADS
+#  include <threads.h>
+#elif defined(RBT_USE_TINYCTHREAD) || defined(TINYCTHREAD_VERSION)
+#  if !defined(TINYCTHREAD_VERSION)
+#    include <tinycthread.h>
+#  endif
+#  define RBT_USE_C11THREADS
+#else
+#  include <pthread.h>
+#endif
+
 #include "rbtree.h"
 
+#if defined(RBT_USE_C11THREADS)
+#define RBT_MUTEX_TYPE mtx_t
+#define RBT_LOCK_MUTEX(a) do { mtx_lock(&(a)); } while(0)
+#define RBT_UNLOCK_MUTEX(a) do { mtx_unlock(&(a)); } while(0)
+#define RBT_INIT_MUTEX(a) do { mtx_init(&(a),mtx_plain); } while(0)
+#define RBT_TERM_MUTEX(a) do { mtx_destroy(&(a)); } while(0)
+#else
+#define RBT_MUTEX_TYPE pthread_mutex_t
+#define RBT_LOCK_MUTEX(a) do { pthread_mutex_lock(&(a)); } while(0)
+#define RBT_UNLOCK_MUTEX(a) do { pthread_mutex_unlock(&(a)); } while(0)
+#define RBT_INIT_MUTEX(a) do { pthread_mutex_init(&(a),NULL); } while(0)
+#define RBT_TERM_MUTEX(a) do { pthread_mutex_destroy(&(a)); } while(0)
+#endif
 
 typedef enum _RBT_COLOUR
 {
@@ -47,7 +72,7 @@ typedef struct _RBT_TREE
 {
     uint32_t nodeCount;
     uint32_t keySeed;
-    pthread_mutex_t mutex;
+    RBT_MUTEX_TYPE mutex;
     RBT_NODE * rootNode;
     rbtree_memalloc_t mem_alloc;
     rbtree_memfree_t mem_free;
@@ -56,12 +81,6 @@ typedef struct _RBT_TREE
     
 #define RBT_TREE_KEYSEED_MAXVALUE (0xFFFFFFFFU)
 #define RBT_TREE_NODECOUNT_MAXVALUE (0xFFFFFFFFU)
-
-    
-#define RBT_LOCK_MUTEX(a) do { pthread_mutex_lock(&(a)); } while(0)
-#define RBT_UNLOCK_MUTEX(a) do { pthread_mutex_unlock(&(a)); } while(0)
-#define RBT_INIT_MUTEX(a) do { pthread_mutex_init(&(a),NULL); } while(0)
-#define RBT_TERM_MUTEX(a) do { pthread_mutex_destroy(&(a)); } while(0)
 
     
 #define rbtree_default_memAlloc malloc

@@ -10,7 +10,6 @@
 
 
 #include "rbtree.h"
-#include <pthread.h>        /* for mutex */
 #include <string.h>         /* memset */
 #include "rbtree_checks.h"
 
